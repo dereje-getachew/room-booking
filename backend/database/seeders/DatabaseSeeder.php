@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Create sample rooms matching the UI categories
         $rooms = [
             ['room_number' => 'Room 101', 'beds' => 1, 'location' => 'Building 1, Floor 1', 'is_active' => true, 'price_per_night' => 99, 'room_type' => 'Standard', 'bed_type' => 'Single', 'description' => 'Cozy single room perfect for solo travelers'],
             ['room_number' => 'Room 102', 'beds' => 1, 'location' => 'Building 1, Floor 1', 'is_active' => true, 'price_per_night' => 89, 'room_type' => 'Standard', 'bed_type' => 'Single', 'description' => 'Comfortable single room with city view'],

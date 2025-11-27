@@ -22,6 +22,9 @@ class ReservationService
     {
         $this->validateNoOverlap($data['room_id'], $data['start_time'], $data['end_time']);
 
+        // Set default status if not provided
+        $data['status'] = $data['status'] ?? 'confirmed';
+
         return $user->reservations()->create($data);
     }
 

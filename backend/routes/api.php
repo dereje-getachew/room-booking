@@ -25,6 +25,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('rooms/{room}', [RoomController::class, 'update'])->middleware('admin'); // Admin only
     Route::delete('rooms/{room}', [RoomController::class, 'destroy'])->middleware('admin'); // Admin only
     Route::get('rooms/{room}', [RoomController::class, 'show']);
+    Route::get('rooms/{room}/current-booking', [RoomController::class, 'currentBooking']);
 
     // Reservations
     Route::get('reservations', [ReservationController::class, 'index']); // My reservations

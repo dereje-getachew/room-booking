@@ -13,6 +13,7 @@ class Reservation extends Model
         'room_id',
         'start_time',
         'end_time',
+        'status',
     ];
 
     protected $casts = [
