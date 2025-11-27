@@ -23,11 +23,15 @@ RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Clear composer cache
+RUN composer clear-cache
+
 # Copy application files
 COPY . .
 
-# Install dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Install dependencies with fallback
+RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts || \
+    composer install --optimize-autoloader --no-dev --no-interaction
 
 # Fix permissions
 RUN chmod -R 777 storage bootstrap/cache
