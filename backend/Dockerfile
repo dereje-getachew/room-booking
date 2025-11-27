@@ -1,36 +1,53 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-# Set working directory
-WORKDIR /var/www
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install nginx and system dependencies
+RUN apk add --no-cache \
+    nginx \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
+    oniguruma-dev \
     libxml2-dev \
     libzip-dev \
     zip \
-    unzip
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    unzip \
+    postgresql-dev
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set working directory
+WORKDIR /var/www
+
 # Copy application
 COPY . .
 
-# Fix permissions (run everything as root in container)
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Fix permissions
 RUN chmod -R 777 storage bootstrap/cache
 
-# Expose port 9000
-EXPOSE 9000
+# Create storage link
+RUN php artisan storage:link
 
-# Start PHP-FPM (but don't drop privileges)
-CMD ["php-fpm", "-F", "-R"]
+# Cache configuration for production
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+# Copy start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expose port 80
+EXPOSE 80
+
+# Start both PHP-FPM and Nginx
+CMD ["/start.sh"]

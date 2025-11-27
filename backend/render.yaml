@@ -1,15 +1,11 @@
 services:
   - type: web
     name: booking-backend
-    env: php
+    env: docker
     plan: free
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-      php artisan migrate --force
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
+    dockerfilePath: ./Dockerfile.production
+    dockerContext: .
+    healthCheckPath: /api/health
     envVars:
       - key: APP_ENV
         value: production
@@ -25,8 +21,44 @@ services:
         value: redis
       - key: QUEUE_CONNECTION
         value: redis
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: booking-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: booking-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: booking-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: booking-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: booking-db
+          property: password
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: booking-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: booking-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: booking-redis
+          property: password
     autoDeploy: true
-    healthCheckPath: /api/health
 
 databases:
   - name: booking-db
