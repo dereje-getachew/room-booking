@@ -6,6 +6,15 @@ use App\Http\Controllers\RoomController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint for Render
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString(),
+        'version' => '1.0.0'
+    ]);
+});
+
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
