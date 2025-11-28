@@ -56,3 +56,22 @@ render.local.yaml
 # Backup files
 *.bak
 *.backup
+
+# Documentation and deployment guides
+*.md
+!README.md
+DEPLOYMENT.md
+QUICK-START-NGROK.md
+expose-backend.md
+render-deployment.md
+cpanel-deployment.md
+vercel-deployment.md
+backend/expose-backend.md
+backend/render-deployment.md
+backend/cpanel-deployment.md
+frontend/vercel-deployment.md
+
+# Scripts for local development
+start-with-ngrok.sh
+prepare_hosting.sh
+working-setup.sh

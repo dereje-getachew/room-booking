@@ -13,7 +13,13 @@ return [
         'https://vercel.app',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^https:\/\/.*\.vercel\.app$/',
+        '/^https:\/\/.*\.ngrok-free\.app$/',
+        '/^https:\/\/.*\.ngrok\.io$/',
+        '/^https:\/\/.*\.loca\.lt$/',
+        '/^https:\/\/.*\.trycloudflare\.com$/',
+    ],
 
     'allowed_headers' => ['*'],
 
