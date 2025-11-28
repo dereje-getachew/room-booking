@@ -9,8 +9,8 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://localhost:3001',
-        'https://*.vercel.app',
-        'https://vercel.app',
+        'https://booking-ststem.vercel.app',
+        'https://booking-ststem-8l2ov1xti-derejes-projects-748af4ba.vercel.app',
     ],
 
     'allowed_origins_patterns' => [
