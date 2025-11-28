@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Generate app key if not exists
+if [ -z "$APP_KEY" ]; then
+    echo "Generating APP_KEY..."
+    php artisan key:generate --force
+fi
+
 # Cache configuration for production at runtime
 echo "Caching configuration..."
 php artisan config:cache
