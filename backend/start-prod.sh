@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin sh
 
 # Generate app key if not exists
 if [ -z "$APP_KEY" ]; then
     echo "Generating APP_KEY..."
     php artisan key:generate --force
 fi
+
+# Run database migrations
+echo "Running database migrations..."
+php artisan migrate --force
 
 # Cache configuration for production at runtime
 echo "Caching configuration..."
