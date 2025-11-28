@@ -34,10 +34,8 @@ RUN chmod -R 777 storage bootstrap/cache
 # Create storage link
 RUN php artisan storage:link
 
-# Cache configuration for production
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+# Cache configuration moved to start.sh for runtime env vars
+
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/http.d/default.conf
