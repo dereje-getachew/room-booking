@@ -35,9 +35,15 @@ RUN composer clear-cache
 # Copy application files
 COPY . .
 
-# Install dependencies with fallback
-RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts || \
-    composer install --optimize-autoloader --no-dev --no-interaction
+# Install dependencies with fallback and verbose output
+RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts --verbose || \
+    composer install --optimize-autoloader --no-dev --no-interaction --verbose
+
+# Verify vendor directory exists
+RUN ls -la vendor/ || echo "Vendor directory missing"
+
+# Test basic PHP functionality
+RUN php -v && echo "PHP is working"
 
 # Fix permissions
 RUN chmod -R 777 storage bootstrap/cache
