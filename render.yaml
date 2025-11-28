@@ -11,6 +11,28 @@ services:
         fromDatabase:
           name: booking-db
           property: connectionString
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: booking-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: booking-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: booking-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: booking-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: booking-db
+          property: password
       - key: APP_NAME
         value: RoomBooker
       - key: APP_ENV
