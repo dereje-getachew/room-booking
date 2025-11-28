@@ -1,4 +1,4 @@
-#!/bin sh
+#!/bin/sh
 
 # Generate app key if not exists
 if [ -z "$APP_KEY" ]; then
