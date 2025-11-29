@@ -9,6 +9,15 @@ echo "DB_HOST: ${DB_HOST:-not set}"
 echo "DB_DATABASE: ${DB_DATABASE:-not set}"
 echo "=== END DEBUG ==="
 
+#############################################
+# STREAM LARAVEL LOGS INTO RENDER LOGS
+#############################################
+echo "Starting Laravel log stream..."
+mkdir -p storage/logs
+touch storage/logs/laravel.log
+tail -n 0 -f storage/logs/laravel.log &
+#############################################
+
 # Generate app key if not exists
 if [ -z "$APP_KEY" ]; then
     echo "Generating APP_KEY..."
@@ -32,6 +41,13 @@ echo "Caching configuration..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+#############################################
+# STREAM PHP-FPM ERRORS INTO RENDER LOGS
+#############################################
+echo "log_errors=On"      > /usr/local/etc/php/conf.d/log.conf
+echo "error_log=/dev/stderr" >> /usr/local/etc/php/conf.d/log.conf
+#############################################
 
 # Start Supervisor
 echo "Starting Supervisor..."
