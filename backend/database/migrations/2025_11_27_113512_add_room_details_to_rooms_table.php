@@ -19,7 +19,7 @@ return new class extends Migration
         });
         
         // Update existing records
-        \DB::statement('UPDATE rooms SET name = room_number, capacity = beds, location = "Building 1, Floor 1" WHERE name IS NULL');
+        \DB::statement("UPDATE rooms SET name = room_number, capacity = beds, location = 'Building 1, Floor 1' WHERE name IS NULL");
         
         // Now drop the old columns
         Schema::table('rooms', function (Blueprint $table) {
