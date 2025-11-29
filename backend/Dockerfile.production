@@ -1,74 +1,40 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.2-apache
 
-# Set working directory
-WORKDIR /var/www
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
-# Install system dependencies including PostgreSQL
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
-    curl \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
     unzip \
-    nginx \
-    supervisor \
-    postgresql-dev \
-    perl \
-    make \
-    autoconf \
-    gcc \
-    g++ \
-    linux-headers
+    libpq-dev \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
 
-# Install PHP extensions including PostgreSQL
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+# Configure Apache document root
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Copy app files
+COPY . /var/www/html
 
-# Clear composer cache
-RUN composer clear-cache
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Copy application files
-COPY . .
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies with fallback and verbose output
-RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts --verbose || \
-    composer install --optimize-autoloader --no-dev --no-interaction --verbose
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Verify vendor directory exists
-RUN ls -la vendor/ || echo "Vendor directory missing"
+# Optimize Laravel
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
 
-# Test basic PHP functionality
-RUN php -v && echo "PHP is working"
+EXPOSE 80
 
-# Fix permissions
-RUN chmod -R 777 storage bootstrap/cache
-
-# Create storage link
-RUN php artisan storage:link
-
-# Cache configuration moved to runtime (start.sh/supervisord)
-
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/http.d/default.conf
-
-# Create supervisor log directory
-RUN mkdir -p /var/log/supervisor
-
-# Copy supervisor configuration
-COPY docker/supervisord.conf /etc/supervisord.conf
-
-# Copy production start script
-COPY start-prod.sh /start-prod.sh
-RUN chmod +x /start-prod.sh
-
-# Expose port
-EXPOSE 8080
-
-# Start via script
-CMD ["/start-prod.sh"]
+CMD ["apache2-foreground"]
