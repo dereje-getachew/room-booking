@@ -1,40 +1,63 @@
-FROM php:8.2-apache
+# Use PHP FPM Alpine image
+FROM php:8.4-fpm-alpine
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Set working directory
+WORKDIR /var/www
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     git \
-    unzip \
-    libpq-dev \
+    curl \
+    libpng-dev \
+    oniguruma-dev \
+    libxml2-dev \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
+    zip \
+    unzip \
+    nginx \
+    supervisor \
+    postgresql-dev \
+    icu-dev \
+    bash \
+    make \
+    autoconf \
+    gcc \
+    g++ \
+    linux-headers
 
-# Configure Apache document root
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# Copy app files
-COPY . /var/www/html
-
-# Set correct permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip intl
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application files
+COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader --no-dev --no-interaction --no-scripts --verbose
 
-# Optimize Laravel
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear
+# Fix permissions
+RUN chmod -R 777 storage bootstrap/cache
 
-EXPOSE 80
+# Create storage symbolic link
+RUN php artisan storage:link
 
-CMD ["apache2-foreground"]
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+# Create supervisor log directory
+RUN mkdir -p /var/log/supervisor
+
+# Copy supervisor configuration
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+# Copy production start script
+COPY start-prod.sh /start-prod.sh
+RUN chmod +x /start-prod.sh
+
+# Expose port
+EXPOSE 8080
+
+# Start via script
+CMD ["/start-prod.sh"]
