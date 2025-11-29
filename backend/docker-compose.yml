@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: room-booking-backend:latest
     container_name: room-booking-backend
     restart: unless-stopped
     working_dir: /var/www
